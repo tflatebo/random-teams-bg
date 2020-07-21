@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
-import sys, os, random, shutil, stat
+import sys, os, random, shutil, stat, time
 
 src_dir = sys.argv[1]
 dst_dir = sys.argv[2]
+
+random.seed()
 
 # get a random file with full path from the dir that is passed in
 # returns a tuple of a full path for the src and destination that 
