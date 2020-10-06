@@ -27,13 +27,18 @@ def get_random_file (src, dst) :
 # args are passed in out of order
 def clean_dst_dir (dir) :
 
-    for filename in os.listdir(dir):
-        file_path = os.path.join(dir, filename)
-        try:
-            if is_hard_link(file_path): # only remove hard links
-                os.unlink(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    try:
+        for filename in os.listdir(dir):
+            file_path = os.path.join(dir, filename)
+            try:
+                if is_hard_link(file_path): # only remove hard links
+                    os.unlink(file_path)
+                elif ("thumb." in file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print('Exception Reason: %s' % (e))
+    except Exception as e:
+        print('Exception Reason: %s' % (e))
 
 # is something a hard link?
 # return true if hard link

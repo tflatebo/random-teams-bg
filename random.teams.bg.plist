@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+    
+    <key>Label</key>
+    <string>random.teams.bg</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>exec /usr/local/bin/python3 $HOME/software/development/github/random-teams-bg/random-teams-bg.py $HOME/Backgrounds $HOME/Teams-BG</string>
+    </array>
+
+    <key>Nice</key>
+    <integer>1</integer>
+
+    <key>StartCalendarInterval</key>
+        <dict>
+            <key>Hour</key>
+            <integer>07</integer>
+            <key>Minute</key>
+            <integer>35</integer>
+        </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/random-teams-bg.err</string>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/random-teams-bg.out</string>
+    </dict>
+</plist>
