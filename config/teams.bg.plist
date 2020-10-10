@@ -4,13 +4,13 @@
     <dict>
     
     <key>Label</key>
-    <string>random.teams.bg</string>
+    <string>teams.bg</string>
 
     <key>ProgramArguments</key>
     <array>
         <string>/bin/sh</string>
         <string>-c</string>
-        <string>exec /usr/local/bin/python3 $HOME/software/development/github/random-teams-bg/random-teams-bg.py $HOME/Backgrounds $HOME/Teams-BG</string>
+        <string>exec /usr/local/bin/python3 $HOME/software/development/github/random-teams-bg/random_teams_bg/util.py $HOME/software/development/github/random-teams-bg/config/random_teams_bg.cfg</string>
     </array>
 
     <key>Nice</key>
@@ -19,18 +19,18 @@
     <key>StartCalendarInterval</key>
         <dict>
             <key>Hour</key>
-            <integer>07</integer>
+            <integer>06</integer>
             <key>Minute</key>
-            <integer>35</integer>
+            <integer>01</integer>
         </dict>
 
     <key>RunAtLoad</key>
     <true/>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/random-teams-bg.err</string>
+    <string>/tmp/teams-bg.err</string>
 
     <key>StandardOutPath</key>
-    <string>/tmp/random-teams-bg.out</string>
+    <string>/tmp/teams-bg.out</string>
     </dict>
 </plist>
