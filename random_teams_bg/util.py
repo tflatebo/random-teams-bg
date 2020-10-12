@@ -1,4 +1,4 @@
-import sys, os, random, shutil, stat, time, pickledb, configparser
+import sys, os, random, shutil, stat, time, pickledb, configparser, logging
 
 # get a random file with full path from the dir that is passed in
 # returns a tuple of a full path for the src and destination that 
@@ -89,7 +89,7 @@ def open_db(name):
     try:
         db = pickledb.load(name, False)
     except Exception as e:
-        print('Exception Reason: %s' % (e))
+        logging.exception('Exception Reason: %s' % (e))
     
     return db
 
@@ -114,6 +114,8 @@ if __name__ == '__main__':
     except IndexError:
         cfg_file = "config/random_teams_bg.cfg"
   
+    logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)
+
     configParser = configparser.RawConfigParser()   
     configParser.read(cfg_file)
 
@@ -135,5 +137,7 @@ if __name__ == '__main__':
 
     # create hard link using the random file paths
     create_new_link(file, src_dir, dst_dir)
+
+    logging.info("Created hard link for " + file + " in " + dst_dir)
 
     close_db(db)
