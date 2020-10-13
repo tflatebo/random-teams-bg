@@ -51,6 +51,7 @@ def is_recent_file(file, limit, db):
     # if the file has a key, and the time since the key was used is less than the limit,
     # then it is a recent file
     if diff < (limit * 86400):
+        logging.info("Found recently used file, skipping: " + file)
         return True
 
     # default is to return false, and allow the file to be used
