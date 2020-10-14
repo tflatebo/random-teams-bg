@@ -71,9 +71,9 @@ def clean_dst_dir (dir) :
                 elif ("thumb." in file_path):
                     os.unlink(file_path)
             except Exception as e:
-                print('Exception Reason: %s' % (e))
+                logging.exception('Caught exception cleaning dst dir: %s' % (e))
     except Exception as e:
-        print('Exception Reason: %s' % (e))
+        logging.exception('Caught exception cleaning dst dir: %s' % (e))
 
 # is something a hard link?
 # return true if hard link
