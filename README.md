@@ -76,7 +76,7 @@ Run tests from the root of the project
 python -m unittest 
 ........
 ----------------------------------------------------------------------
-Ran 8 tests in 0.003s
+Ran 8 tests in 0.003
 
 OK
 ```

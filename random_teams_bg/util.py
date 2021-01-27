@@ -1,3 +1,4 @@
+from PIL import Image
 import sys, os, random, shutil, stat, time, pickledb, configparser, logging
 
 # get a random file with full path from the dir that is passed in
@@ -57,6 +58,10 @@ def is_recent_file(file, limit, db):
     # default is to return false, and allow the file to be used
     return False
 
+# get a list of photos from an album
+def get_google_photo_list(album_url):
+    return 'foo'
+
 # clean out the destination directory, but only remove hard links, this
 # should protect against removing a bunch of files by mistake in case the 
 # args are passed in out of order
@@ -70,6 +75,10 @@ def clean_dst_dir (dir) :
                     os.unlink(file_path)
                 elif ("thumb." in file_path):
                     os.unlink(file_path)
+                elif ("result.png" in file_path):
+                    os.unlink(file_path)
+                else:
+                    logging.info('not cleaning ' + file_path)
             except Exception as e:
                 logging.exception('Caught exception cleaning dst dir: %s' % (e))
     except Exception as e:
@@ -103,6 +112,17 @@ def create_new_link(file, src_dir, dst_dir):
 
     os.link(src, dst)
 
+def overlay_logo(bg_filename, logo_filename, result_filename):
+
+    background = Image.open(bg_filename).convert("RGBA")
+    overlay = Image.open(logo_filename).convert("RGBA")
+
+    new_overlay = Image.new('RGBA', background.size, (255, 0, 0, 0))
+    new_overlay.paste(overlay, (0,0), overlay)
+
+    background.paste(new_overlay, (0,0), new_overlay)
+    return background.save(result_filename, "PNG")
+
 ###
 #
 # Main
@@ -124,17 +144,25 @@ if __name__ == '__main__':
     dst_dir = configParser.get('random_teams_bg', 'dst_dir')
     db_name = configParser.get('random_teams_bg', 'db_name')
     usettldb = configParser.get('random_teams_bg', 'usettldb')
+    logo = configParser.get('random_teams_bg', 'overlay_logo')
+    output_dir = configParser.get('random_teams_bg', 'output_dir')
+    logo_file = configParser.get('random_teams_bg', 'logo_file')
 
     random.seed()
 
     # open the pickledb
     db = open_db(db_name)
 
-    # clean out anything in the destionation directory
+    # clean out anything in the destination directory
     clean_dst_dir(dst_dir)
 
     # pull a random filename out of the pool of available files in the src_dir
     file = get_random_file(src_dir, db, usettldb)
+
+    if(logo == 'True'):
+        overlay_logo(src_dir + '/' + file, logo_file, output_dir + "/result.png")
+        file = "result.png"
+        src_dir = output_dir
 
     # create hard link using the random file paths
     create_new_link(file, src_dir, dst_dir)

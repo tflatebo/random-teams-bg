@@ -2,7 +2,7 @@
 import unittest, pickledb, time, glob, os
 
 # what we are testing
-from random_teams_bg.util import is_hard_link, is_soft_link, is_recent_file, get_random_file
+from random_teams_bg.util import is_hard_link, is_soft_link, is_recent_file, get_random_file, get_google_photo_list
 
 class TestRandomTeamsBG(unittest.TestCase):
 
@@ -103,6 +103,10 @@ class TestRandomTeamsBG(unittest.TestCase):
         diff = now - self.db.get('file2.jpg')
         self.assertTrue(diff < 5)
         self.assertTrue(diff > 0)
+
+    # # can we get a list of filenames from a google photo URL?
+    # def test_get_google_photo_list(self):
+    #     self.assertEqual(get_google_photo_list('https://photos.app.goo.gl/Ta6xFfwLKp3UHyL46'), 'foo2')
 
 
 if __name__ == "__main__":
