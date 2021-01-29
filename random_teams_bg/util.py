@@ -117,11 +117,25 @@ def overlay_logo(bg_filename, logo_filename, result_filename):
     background = Image.open(bg_filename).convert("RGBA")
     overlay = Image.open(logo_filename).convert("RGBA")
 
-    new_overlay = Image.new('RGBA', background.size, (255, 0, 0, 0))
-    new_overlay.paste(overlay, (0,0), overlay)
+    width = background.size[0]
+    
+    # resize the overlay to fit with the background image
+    # we use a ratio based on a 3968 bg image width
+    # and a 512x384 overlay size
+    new_owidth = int(width * (512/3968))
+    new_oheight = int(new_owidth * (384/512))
+    new_overlay = overlay.resize((new_owidth, new_oheight))
 
-    background.paste(new_overlay, (0,0), new_overlay)
-    return background.save(result_filename, "PNG")
+    # resize the background image to match the ratio of a 
+    # 1920x1080 image, which is about 1.77777
+    new_height = width / (1920/1080)
+    new_background = background.resize((width, int(new_height)))
+
+    large_overlay = Image.new('RGBA', new_background.size, (255, 0, 0, 0))
+    large_overlay.paste(new_overlay, (0,0), new_overlay)
+
+    new_background.paste(large_overlay, (0,0), large_overlay)
+    return new_background.save(result_filename, "PNG")
 
 ###
 #
