@@ -112,6 +112,24 @@ def create_new_link(file, src_dir, dst_dir):
 
     os.link(src, dst)
 
+# use an image to overlay onto the background
+# generally this is a transparent PNG that is a logo 
+# of some kind. this will place it at 0,20 (left top, 20 pixels down) 
+# 
+# since images can be all different aspect ratios 
+# recently Google camera prefers a 4:3 or 1.333 ratio,
+# and MS teams doesn't like that on my monitors, and my resolution 
+# is 1080p so if the image isn't a 16:9 ratio (1.7777)
+# the top and bottom get cut off. this will resize both the background 
+# to that ratio and also resize the logo to fit according to a 
+# 7.75:1 ratio (meaning there would be 7.75 widths of the logo in the image)
+# 
+# To use the Image.paste function, we also have to create a new transparent overlay
+# that is the exact same size as the background, then put the logo onto that, 
+# then paste that new transparent image onto the background. its easier.
+# 
+# this will save the new composited file into the config:output_dir/result.png
+# then make a hardlink into config:dst_dir so the source image isn't modified
 def overlay_logo(bg_filename, logo_filename, result_filename):
 
     background = Image.open(bg_filename).convert("RGBA")
@@ -128,11 +146,12 @@ def overlay_logo(bg_filename, logo_filename, result_filename):
 
     # resize the background image to match the ratio of a 
     # 1920x1080 image, which is about 1.77777
-    new_height = width / (1920/1080)
-    new_background = background.resize((width, int(new_height)))
+    new_height = int(width / (1920/1080))
+    logging.info("converted from (w,h) " + str(background.size) + " to " + str((width, new_height)))
+    new_background = background.resize((width, new_height))
 
     large_overlay = Image.new('RGBA', new_background.size, (255, 0, 0, 0))
-    large_overlay.paste(new_overlay, (0,0), new_overlay)
+    large_overlay.paste(new_overlay, (0,20), new_overlay)
 
     new_background.paste(large_overlay, (0,0), large_overlay)
     return new_background.save(result_filename, "PNG")
@@ -173,12 +192,18 @@ if __name__ == '__main__':
     # pull a random filename out of the pool of available files in the src_dir
     file = get_random_file(src_dir, db, usettldb)
 
+    logging.info("Picked " + file + " for background")
+
+    # overlay a logo if configured to do so
     if(logo == 'True'):
         overlay_logo(src_dir + '/' + file, logo_file, output_dir + "/result.png")
         file = "result.png"
         src_dir = output_dir
 
     # create hard link using the random file paths
+    # this is what makes it available to MS Teams
+    # recently I noticed you have to restart MS Teams to get it to 
+    # recognize the image
     create_new_link(file, src_dir, dst_dir)
 
     logging.info("Created hard link for " + file + " in " + dst_dir)
