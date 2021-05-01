@@ -130,31 +130,68 @@ def create_new_link(file, src_dir, dst_dir):
 # 
 # this will save the new composited file into the config:output_dir/result.png
 # then make a hardlink into config:dst_dir so the source image isn't modified
-def overlay_logo(bg_filename, logo_filename, result_filename):
+def overlay_logo(bg_filename, logo_filename, logo_filename_light, result_filename):
 
     background = Image.open(bg_filename).convert("RGBA")
-    overlay = Image.open(logo_filename).convert("RGBA")
 
-    width = background.size[0]
-    
-    # resize the overlay to fit with the background image
+    logging.info("resizing background from (w,h) " + str(background.size) + " to " + str((fixed_width, fixed_height)))
+    new_background = background.resize((fixed_width, fixed_height))
+
+    # find out what the new overlay size should be based on the background size
     # we use a ratio based on a 3968 bg image width
     # and a 512x384 overlay size
-    new_owidth = int(width * (512/3968))
+    new_owidth = int(fixed_width * (512/3968))
     new_oheight = int(new_owidth * (384/512))
+
+    logo_offsetx = int(logo_offset[0] * fixed_width)
+    logo_offsety = int(logo_offset[1] * fixed_height)
+
+    # find out if the box where the overlay goes is light or dark
+    if(background_is_dark(src_dir + '/' + file, (logo_offsetx, logo_offsety, logo_offsetx + new_owidth, logo_offsety + new_oheight))):
+        logo_filename = logo_filename_light
+
+    overlay = Image.open(logo_filename).convert("RGBA")
+    
+    # resize the overlay to fit with the background image
     new_overlay = overlay.resize((new_owidth, new_oheight))
 
-    # resize the background image to match the ratio of a 
-    # 1920x1080 image, which is about 1.77777
-    new_height = int(width / (1920/1080))
-    logging.info("converted from (w,h) " + str(background.size) + " to " + str((width, new_height)))
-    new_background = background.resize((width, new_height))
-
+    # create a new empty overlay the same size as the background
     large_overlay = Image.new('RGBA', new_background.size, (255, 0, 0, 0))
-    large_overlay.paste(new_overlay, (0,20), new_overlay)
 
+    # paste the overlay logo onto the empty overlay in prep for pasting
+    large_overlay.paste(new_overlay, (logo_offsetx, logo_offsety), new_overlay)
+
+    # paste the overlay onto the same sized background
     new_background.paste(large_overlay, (0,0), large_overlay)
+
+    # save the resulting image as a png
     return new_background.save(result_filename, "PNG")
+
+# is the area where we are going to paste light or darK? if its lighter we use the standard 
+# logo, otherwise we use the lighter logo against a dark background area
+def background_is_dark(image_filename, box):
+
+    img = Image.open(image_filename).convert("L")
+
+    # crop to the rectangle where the overlay will
+    sub_img = img.crop(box)
+
+    pixel_map = sub_img.load()
+
+    # inspect all pixels in the sub_img to see if they are dark
+    dark_count = 0
+    for x in range(sub_img.width):
+        for y in range(sub_img.height):
+            pixel = pixel_map[x,y]
+            # if the grayscale of the pixel is less than 128 mark it as dark
+            if(pixel < 128):
+                dark_count = dark_count + 1
+
+    logging.info("dark_count: " + str(dark_count) + " of " + str(sub_img.width * sub_img.height))
+
+    # if more than 30% of the pixels are marked as dark, use the lighter image
+    return dark_count > (sub_img.width * sub_img.height * 0.3)
+
 
 ###
 #
@@ -173,13 +210,27 @@ if __name__ == '__main__':
     configParser = configparser.RawConfigParser()   
     configParser.read(cfg_file)
 
+    # where are the background images
     src_dir = configParser.get('random_teams_bg', 'src_dir')
+    # where is teams going to look for backgrounds
     dst_dir = configParser.get('random_teams_bg', 'dst_dir')
+    # what is the ttl db name
     db_name = configParser.get('random_teams_bg', 'db_name')
+    # shoudl we use a db to prevent using the same background too often?
     usettldb = configParser.get('random_teams_bg', 'usettldb')
+    # should we use an overlay logo?
     logo = configParser.get('random_teams_bg', 'overlay_logo')
+    # where does the output file get saved
     output_dir = configParser.get('random_teams_bg', 'output_dir')
+    # where do we get the logo image from 
     logo_file = configParser.get('random_teams_bg', 'logo_file')
+    # lighter logo for darker backgrounds
+    logo_file_light = configParser.get('random_teams_bg', 'logo_file_light')
+    # where to place the logo onto the background
+    logo_offset = (float(configParser.get('random_teams_bg', 'logo_offset_x')), float(configParser.get('random_teams_bg', 'logo_offset_y')))
+    # bring in the fixed width and height to resize all background images to
+    fixed_width = int(configParser.get('random_teams_bg', 'fixed_width'))
+    fixed_height = int(configParser.get('random_teams_bg', 'fixed_height'))
 
     random.seed()
 
@@ -194,9 +245,9 @@ if __name__ == '__main__':
 
     logging.info("Picked " + file + " for background")
 
-    # overlay a logo if configured to do so
-    if(logo == 'True'):
-        overlay_logo(src_dir + '/' + file, logo_file, output_dir + "/result.png")
+    # overlay a logo if configured to do so, also resizes background to configured size
+    if(logo == 'True'):        
+        overlay_logo(src_dir + '/' + file, logo_file, logo_file_light, output_dir + "/result.png")
         file = "result.png"
         src_dir = output_dir
 

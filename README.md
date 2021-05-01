@@ -39,10 +39,15 @@ config/teams.bg.plist       # config for running via launchd (recommended)
 src_dir=<your home dir>/Backgrounds/  # src dir for your background files
 dst_dir=<your home dir>/Teams-BG/     # where this is a synlink to ~/Library/Application Support/Microsoft/Teams/Backgrounds/Uploads
 db_name=<install location of the script>/random-teams-bg/bg.db
-usettldb=True  # turn this on if you want to have files used every so often, this will put a ttl on the file: the count of files in the src_dir / 2 number of days, works best with more than 20 or so files. I have about 200.
+usettldb=True  # turn this on if you want to have files used every so often, this will put a ttl on the file: the count of files in the src_dir / 2 number of days, works best with more than 20 or so files. I have about 250.
 overlay_logo=True # if you want to use the logo overlay feature you need this plus the next two
 output_dir=<your home dir>/tmp # where will it write the output file (result.png) after the overlay
 logo_file=<your home dir/logos/logo.png # where is the logo file that will get overlayed onto background. this should be a transparent PNG if you want it to look good
+logo_file_light=<your home dir>/logos/logo_light.png # a lighter version of your logo, autodetects if the background is too dark and will use this
+fixed_width=3968 # resize all backgrounds to this width
+fixed_height=2232 # resize all backgrounds to this height
+logo_offset_x=0.21 # place the logo image at this ratio of the bg width
+logo_offset_y=0.15 # place logo at this ratio of bg height
 ````
 
 ### running this in launchd as a daily job
@@ -76,6 +81,9 @@ ls -l /tmp/ # you should see two files, teams-bg.err and teams-bg.out with the c
 ### tests
 Run tests from the root of the project
 ```bash
+# is you are using virtual env
+source .venv/bin/activate
+# run the tests
 python -m unittest 
 ........
 ----------------------------------------------------------------------
