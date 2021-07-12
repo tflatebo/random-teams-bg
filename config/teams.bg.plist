@@ -10,7 +10,7 @@
     <array>
         <string>/bin/sh</string>
         <string>-c</string>
-        <string>exec $HOME/software/development/github/random-teams-bg/.venv/bin/python3 $HOME/software/development/github/random-teams-bg/random_teams_bg/util.py $HOME/software/development/github/random-teams-bg/config/random_teams_bg.cfg</string>
+        <string>exec $HOME/software/development/github/random-teams-bg/.venv/bin/python3 $HOME/software/development/github/random-teams-bg/random_teams_bg/util.py --cfg $HOME/software/development/github/random-teams-bg/config/random_teams_bg.cfg</string>
     </array>
 
     <key>Nice</key>

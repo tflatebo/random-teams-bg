@@ -1,5 +1,5 @@
 from PIL import Image
-import sys, os, random, shutil, stat, time, pickledb, configparser, logging
+import sys, os, random, shutil, stat, time, pickledb, configparser, logging, argparse
 
 # get a random file with full path from the dir that is passed in
 # returns a tuple of a full path for the src and destination that 
@@ -147,7 +147,7 @@ def overlay_logo(bg_filename, logo_filename, logo_filename_light, result_filenam
     logo_offsety = int(logo_offset[1] * fixed_height)
 
     # find out if the box where the overlay goes is light or dark
-    if(background_is_dark(src_dir + '/' + file, (logo_offsetx, logo_offsety, logo_offsetx + new_owidth, logo_offsety + new_oheight))):
+    if(background_is_dark(file, (logo_offsetx, logo_offsety, logo_offsetx + new_owidth, logo_offsety + new_oheight))):
         logo_filename = logo_filename_light
 
     overlay = Image.open(logo_filename).convert("RGBA")
@@ -190,7 +190,7 @@ def background_is_dark(image_filename, box):
     logging.info("dark_count: " + str(dark_count) + " of " + str(sub_img.width * sub_img.height))
 
     # if more than 30% of the pixels are marked as dark, use the lighter image
-    return dark_count > (sub_img.width * sub_img.height * 0.3)
+    return dark_count > (sub_img.width * sub_img.height * 0.25)
 
 
 ###
@@ -200,15 +200,19 @@ def background_is_dark(image_filename, box):
 ###
 
 if __name__ == '__main__':
-    try:
-        cfg_file = sys.argv[1]
-    except IndexError:
-        cfg_file = "config/random_teams_bg.cfg"
-  
+
+    file = None
+
+    parser = argparse.ArgumentParser(description='Make a background for MS Teams.')
+    parser.add_argument('--cfg', dest='cfg_file', default='config/random_teams_bg.cfg', help='Location of the config file')
+    parser.add_argument('--file', dest='file', help='process source image file rather than from the source dir, must be absolute path')
+
+    args = parser.parse_args()
+
     logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)
 
     configParser = configparser.RawConfigParser()   
-    configParser.read(cfg_file)
+    configParser.read(args.cfg_file)
 
     # where are the background images
     src_dir = configParser.get('random_teams_bg', 'src_dir')
@@ -239,15 +243,19 @@ if __name__ == '__main__':
 
     # clean out anything in the destination directory
     clean_dst_dir(dst_dir)
+    
+    if args.file is None:
+        # pull a random filename out of the pool of available files in the src_dir
+        file = src_dir + '/' + get_random_file(src_dir, db, usettldb)
+        logging.info("Picked " + file + " for background")
+    else:
+        file = args.file
 
-    # pull a random filename out of the pool of available files in the src_dir
-    file = get_random_file(src_dir, db, usettldb)
-
-    logging.info("Picked " + file + " for background")
+    logging.info("file: " + file)
 
     # overlay a logo if configured to do so, also resizes background to configured size
     if(logo == 'True'):        
-        overlay_logo(src_dir + '/' + file, logo_file, logo_file_light, output_dir + "/result.png")
+        overlay_logo(file, logo_file, logo_file_light, output_dir + "/result.png")
         file = "result.png"
         src_dir = output_dir
 

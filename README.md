@@ -20,11 +20,11 @@ You can run this as a daily launchd job, or manually anytime you like. Launchd i
 
 #### usage
 ```bash
-random_teams_bg/util.py config_file
+.venv/bin/python3 random_teams_bg/util.py -h
 ```
 #### example
 ```bash
-random_teams_bg/util.py config/teams_bg.cfg
+.venv/bin/python3 random_teams_bg/util.py --cfg config/teams_bg.cfg --file ~/Backgrounds/some_img.png
 ```
 
 You will need to edit the two config files:
