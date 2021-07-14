@@ -204,6 +204,7 @@ if __name__ == '__main__':
     file = None
 
     parser = argparse.ArgumentParser(description='Make a background for MS Teams.')
+    parser.add_argument('cfg_file')
     parser.add_argument('--cfg', dest='cfg_file', default='config/random_teams_bg.cfg', help='Location of the config file')
     parser.add_argument('--file', dest='file', help='process source image file rather than from the source dir, must be absolute path')
 
